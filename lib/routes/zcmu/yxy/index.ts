@@ -1,4 +1,4 @@
-import { Route } from '@/types';
+import { Data, Route } from '@/types';
 import got from '@/utils/got';
 import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
@@ -38,7 +38,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const type = Number.parseInt(ctx.req.param('type'));
-    const id = map.get(type).id;
+    const id = map.get(type)!.id;
     const res = await got({
         method: 'get',
         url: `${host}/${id}.htm`,
@@ -48,17 +48,17 @@ async function handler(ctx) {
     const items = $('.lm_list li')
         .toArray()
         .map((item) => {
-            item = $(item);
+            const element = $(item);
             return {
-                title: item.find('a').text(),
-                link: `https://yxy.zcmu.edu.cn/${item.find('a').attr('href')}`,
-                pubDate: parseDate(item.find('span').text().trim()),
+                title: element.find('a').text(),
+                link: `https://yxy.zcmu.edu.cn/${element.find('a').attr('href')}`,
+                pubDate: parseDate(element.find('span').text().trim()),
             };
         });
 
     return {
-        title: map.get(type).title,
+        title: map.get(type)!.title,
         link: `${host}${id}`,
         item: items,
-    };
+    } as Data;
 }

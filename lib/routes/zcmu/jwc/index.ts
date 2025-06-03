@@ -1,4 +1,4 @@
-import { Route } from '@/types';
+import { Route, Data } from '@/types';
 import got from '@/utils/got';
 import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
@@ -37,7 +37,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const type = Number.parseInt(ctx.req.param('type'));
-    const id = map.get(type).id;
+    const id = map.get(type)!.id;
     const res = await got({
         method: 'get',
         url: `${host}/${id}.htm`,
@@ -47,17 +47,17 @@ async function handler(ctx) {
     const items = $('.winstyle196327 tr:lt(20)')
         .toArray()
         .map((item) => {
-            item = $(item);
+            const element = $(item);
             return {
-                title: item.find('a').attr('title'),
-                link: `https://jwc.zcmu.edu.cn/${item.find('a').attr('href')}`,
-                pubDate: parseDate(item.find('span.timestyle196327').text().trim()),
+                title: element.find('a').attr('title'),
+                link: `https://jwc.zcmu.edu.cn/${element.find('a').attr('href')}`,
+                pubDate: parseDate(element.find('span.timestyle196327').text().trim()),
             };
         });
 
     return {
-        title: map.get(type).title,
+        title: map.get(type)!.title,
         link: `${host}${id}`,
         item: items,
-    };
+    } as Data;
 }
